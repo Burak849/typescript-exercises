@@ -72,3 +72,143 @@ data = {
     entry: 1,
     entry2: 'some text' 
 };
+
+
+// Choices
+
+enum Role {
+    Admin = 0, // you can decide for the starting value
+    Editor,
+    Guest,
+} // you can create Role type now
+
+type Roles = 'admin' | 'editor' | 'guest' | 'reader'; // now you can use those everywhere
+
+type User = {
+    name: string;
+    age: number;
+    role: Roles;
+    permissions: string[];
+};
+
+// it affects like an array ( it makes like 0 = admin 2 = guest )
+let userRole: Role = Role.Admin; // 0 => Admin, 1=> Guest ,, 
+
+userRole = Role.Guest;
+
+let newRole: 'admin' | 'editor' | 'guest' | 'reader' = 'admin'; // you can create new types
+newRole = 'guest';
+
+let anotherPossibleResults: [1 | -1, 1 | -1];
+anotherPossibleResults = [ 1, -1 ];
+
+//FUNCITONS
+
+function access( roles: Roles ) {  // you can get the types from top in type Roles  = ...
+
+
+}
+
+function adds( a: number , b: number ): number { 
+    return a + b;
+}
+
+function log( message: string): void { // If it doesnt return anything you can use
+    console.log(message);
+}
+
+function logAndThrow (errorMessage: string): never { // it was void but we overwrote it as 'never' it will freeze the function
+    console.log(errorMessage);
+    throw new Error(errorMessage);
+}
+
+const logMsg = ( msg: string) => {
+    console.log(msg);
+}; // normal javascript arrow function
+
+function performJob( cb: (msg: string) => void ) { // this is how you define a function type in typescript
+    // ...
+    cb('Job done!');
+}
+
+performJob(log);
+
+type Users = {
+    name: string;
+    age: number;
+    greet: () => string;
+};
+
+let userA: Users = {
+    name: 'Burak',
+    age:25,
+    greet() {
+        console.log("Hello there!");
+        return this.name;
+    }
+}
+
+
+// SPEACIAL TYPES
+
+let a: null | string ; // this value hold null
+
+a = "Hi"; // so it can be null or string
+// ... 
+// you can make it null later  
+a = null;
+
+let b: undefined | string; 
+
+
+const inputEl = document.getElementById("user-name") as HTMLInputElement | null; // you can see here it can be null, if you put ! to the end it says it cant be null
+
+
+// if (!inputEl){
+//    throw new Error("element not found");
+// }
+
+
+console.log(inputEl?.value); // you can check it. It cant be null anymore typescript is clever enough to understand that
+// user ? question mark if it can be null... If it is null it wont take the null if its not null it will take the value
+
+// UNKNOWN
+
+function process( val: unknown ){ // its like any but its not
+    // it forces the developer to use if 
+
+    if ( typeof val === 'object' && !!val && 'log' in val && typeof val.log === 'function' ) // pretty complex code but you can describe many of them and make sure to safely execute the code
+    { 
+        val.log();
+    }
+}
+
+// OPTIONAL VALUE TYPES
+
+function generateError(msg?: string) { // to make it optional put a question mark ?
+    throw new Error(msg);
+}
+
+generateError("An error occured!");
+
+
+
+type UserR = {
+    name: string;
+    age: number;
+    role?: 'admin' | 'guest'
+}; // this is also optional
+
+// DOUBLE QUESTION MARK OPERATOR ??
+
+let input = null;
+const didProvideInput = input || false; // if there is get 'input' it it didnt provide it is false ( just it will use the false)
+const didProvidedInput = input ?? false; // this one will control the input like undifend, null or 0 bla bla then it will do false
+
+
+
+
+
+
+
+
