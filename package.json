@@ -10,6 +10,16 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^22.13.10",
     "typescript": "^5.8.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Burak849/typescript-exercises.git"
+  },
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Burak849/typescript-exercises/issues"
+  },
+  "homepage": "https://github.com/Burak849/typescript-exercises#readme"
 }
