@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 let userName;
 let userAge = 25; // If you didnt have initial type you dont need to assing the type typescript automatically will take the assignment as a type.
 userName = "Burak";
@@ -96,7 +94,7 @@ const inputEl = document.getElementById("user-name"); // you can see here it can
 // if (!inputEl){
 //    throw new Error("element not found");
 // }
-console.log(inputEl?.value); // you can check it. It cant be null anymore typescript is clever enough to understand that
+console.log(inputEl === null || inputEl === void 0 ? void 0 : inputEl.value); // you can check it. It cant be null anymore typescript is clever enough to understand that
 // user ? question mark if it can be null... If it is null it wont take the null if its not null it will take the value
 // UNKNOWN
 function process(val) {
@@ -114,5 +112,6 @@ generateError("An error occured!");
 // DOUBLE QUESTION MARK OPERATOR ??
 let input = null;
 const didProvideInput = input || false; // if there is get 'input' it it didnt provide it is false ( just it will use the false)
-const didProvidedInput = input ?? false; // this one will control the input like undifend, null or 0 bla bla then it will do false
+const didProvidedInput = input !== null && input !== void 0 ? input : false; // this one will control the input like undifend, null or 0 bla bla then it will do false
+export {};
 //# sourceMappingURL=basics.js.map
