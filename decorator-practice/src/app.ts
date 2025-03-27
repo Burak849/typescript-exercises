@@ -1,8 +1,22 @@
+//! Drag and Drop interfaces
+
+interface Draggable {
+    dragStartHandler(event: DragEvent): void;
+    dragEndHandler(event: DragEvent): void;
+}
+interface DragTarget{
+    dragOverHandler(event: DragEvent) :void;
+    dropHandler(event: DragEvent) :void;
+    dragLeaveHandler(event: DragEvent) :void;
+}
+
+
+
 //! Project Types
 enum ProjectStatus {
     Active,
     Finished
-} // this is perfect to use in status
+} // enum is perfect to use in status
 
 class Project{
     constructor( 
@@ -10,8 +24,7 @@ class Project{
         public title: string, 
         public description: string, 
         public people: number, 
-        public status: ProjectStatus ){
-    }
+        public status: ProjectStatus ){}
 }
 
 
@@ -29,7 +42,7 @@ class State <T> {
 
 class ProjectState extends State<Project> {
     
-    private projects: any[] = [];
+    private projects: Project[] = [];
     private static instance: ProjectState;
 
     private constructor(){
@@ -61,6 +74,18 @@ class ProjectState extends State<Project> {
             ProjectStatus.Active ); // you should declare the enum here
 
         this.projects.push(newProject);
+        this.updateListeners();
+        }
+
+    moveProject(projectId: string, newStatus: ProjectStatus ){
+        const project = this.projects.find( prj => prj.id === projectId );
+        if ( project && project.status !== newStatus ){
+            project.status = newStatus;
+            this.updateListeners();
+        }
+    } // if we dont dude that it can be dragging and dropping to the same box and it will always trigger the data
+
+    private updateListeners(){
         for ( const listenerFn of this.listeners ){
             listenerFn( this.projects.slice() ); // they cant be added from the place, it will be just copied
         } // every listener is making copy of our project now
@@ -104,7 +129,7 @@ function validate( validatableInput: Validatable ){ // validation rules
 }
 
 //! Autobind Decorator
-function autobind ( _: any, _2: string, descriptor: PropertyDescriptor ){
+function autobind ( _: any, _2: string | symbol, descriptor: PropertyDescriptor ){
     const originMethod = descriptor.value;
     const adjDescriptor: PropertyDescriptor = {
         configurable: true,
@@ -142,16 +167,59 @@ function autobind ( _: any, _2: string, descriptor: PropertyDescriptor ){
     abstract renderContent(): void;
     // you cant private the abstracts
 }
+//! Project Item Class
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements Draggable {
+    private project: Project;
+
+    get persons(){ // we are using that to clarify the number of people and changing the message depends their population
+        if( this.project.people === 1){
+            return '1 person';
+        } else {
+            return `${this.project.people} persons`;
+        }
+    }
+
+    constructor(hostId: string, project: Project ){
+        super( 'single-project', hostId, false, project.id ); // where the item will be rendered in we will provide the id here
+        this.project = project;
+
+        this.configure();
+        this.renderContent();
+    }
+    @autobind
+    dragStartHandler(event: DragEvent){
+        event.dataTransfer!.setData('text/plain', this.project.id); // this is java script prop to transfer the data and set it, text/plain means we are going to attack a text file with plain 
+    // this.project.id is fetching the data
+    event.dataTransfer!.effectAllowed = 'move'; // telling the browser to move the element
+    }
+    
+    dragEndHandler(_: DragEvent){
+        console.log('DragEnd');
+    }
+    
+    configure(){
+        this.element.addEventListener('dragstart', this.dragStartHandler);
+    };
+
+    renderContent(){
+        this.element.querySelector('h2')!.textContent = this.project.title; // rendered element
+        this.element.querySelector('h3')!.textContent = this.persons + ' assigned'; // we dont need to type this.project.people.toString() anymore becase
+        // we are using getter method, like this its trigger the getter
+        this.element.querySelector('p')!.textContent = this.project.description;
+    };
+}
 
 //! Project List class
-class ProjectList extends Component<HTMLDivElement, HTMLElement> { // we plugged in the Component class
+class ProjectList extends Component<HTMLDivElement, HTMLElement> implements DragTarget { // we plugged in the Component class
     // tempEl: HTMLTemplateElement;
     // hostEl: HTMLDivElement; 
     // element: HTMLElement; // we are taking those from component class
-    assignedProjects: any[];  
+    assignedProjects: Project[];  
+    
 
     constructor( private type: 'active' | 'finished' ){ // here we could use enum like the top but we need the type down in this.element.id
        super('project-list', 'app', false, `${type}-project`); // we must add this because extending another class
+       
         // this.tempEl = document.getElementById('project-list')! as HTMLTemplateElement; // adding ! made it null able, we dont need this anymore
         // this.hostEl = document.getElementById('app')! as HTMLDivElement; we are using those in super
         this.assignedProjects = [];
@@ -163,7 +231,31 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> { // we plugged
         this.configure();
         this.renderContent();
     }
+
+    @autobind
+    dragOverHandler(event: DragEvent){
+        if ( event.dataTransfer && event.dataTransfer.types[0] === 'text/plain' ){
+            event.preventDefault(); // only for this you will allow to drop
+            const listEl = this.element.querySelector('ul')!;
+            listEl.classList.add('droppable');
+        }
+    }
+
+    dragLeaveHandler(_: DragEvent) {
+        const listEl = this.element.querySelector('ul')!;
+        listEl.classList.remove('droppable');
+    }
+
+    @autobind
+    dropHandler(event: DragEvent) {
+        const prjId = event.dataTransfer!.getData('text/plain');
+        projectState.moveProject(prjId, this.type === 'active' ? ProjectStatus.Active : ProjectStatus.Finished );
+    }
+
     configure() { // we took this from constructor to configure
+        this.element.addEventListener('dragover', this.dragOverHandler);
+        this.element.addEventListener('dragleave', this.dragLeaveHandler);
+        this.element.addEventListener('drop', this.dropHandler);
         projectState.addListener( (projects: Project[]) => {
             // now we are going to create a filter here
             const relProjects = projects.filter( prj => {
@@ -183,16 +275,19 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> { // we plugged
     renderContent(){ // we do not need to private method here
         const listId = `${this.type}-projects-list`;
         this.element.querySelector('ul')!.id = listId;
-        this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + 'PROJECTS';
-    }
+        this.element.querySelector('h2')!.textContent =
+        this.type.toUpperCase() + ' PROJECTS';
+  }
 
     private renderProjects () {
         const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
         listEl.innerHTML = ''; // we will render all the project by getting rid of the others //? BUG : If we add 2nd element it duplicates check that
         for ( const projectItems of this.assignedProjects ){
-            const listItem = document.createElement('li');
-            listItem.textContent = projectItems.title; // every project item will be project by title
-            listEl?.appendChild(listItem);
+            new ProjectItem(this.element.querySelector('ul')!.id, projectItems); // this.element.id also counting the section element from html and add it to DOM, thats why we got it by queryselector
+
+            // const listItem = document.createElement('li');
+            // listItem.textContent = projectItems.title; // every project item will be project by title
+            // listEl?.appendChild(listItem);
         }
     }
     
@@ -233,9 +328,9 @@ class Input extends Component<HTMLDivElement, HTMLFormElement> {
     renderContent(){}
 
     private gatherInputs(): [string, string, number] | void { // returns a tuple, we say that we will take from inputs as first element srting 2nd string and 3rd is number OR nothing
-        const enteredTitle = this.titleInputElement.value;
-        const enteredDescription = this.descriptionInputElement.value;
-        const enteredPeople = this.peopleInputElement.value;
+        const enteredTitle = this.titleInputElement.value.trim();
+        const enteredDescription = this.descriptionInputElement.value.trim();
+        const enteredPeople = this.peopleInputElement.value.trim();
 
         const titleValidatable: Validatable = {
             value: enteredTitle,
