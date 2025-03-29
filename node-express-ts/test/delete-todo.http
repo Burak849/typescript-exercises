@@ -1,0 +1,3 @@
+DELETE http://localhost:3000/todos/0.16803125604621272
+# care for the commands for http requests
+
