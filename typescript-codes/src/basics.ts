@@ -203,12 +203,90 @@ type UserR = {
 
 let input = null;
 const didProvideInput = input || false; // if there is get 'input' it it didnt provide it is false ( just it will use the false)
-const didProvidedInput = input ?? false; // this one will control the input like undifend, null or 0 bla bla then it will do false
+const didProvidedInput = input ?? false; // this one will control the input like undefined, null or 0 bla bla then it will do false
 
 
 
+//! --------------------------LEGACY PART--------------------------------- !\\
+
+function add2(n1: number, n2:number, showResult: boolean, phrase: string ){
+    // if(typeof n1 !== 'number' || typeof n2 !== 'number'){
+    //     throw new Error('Incorrect output!');
+    // } this sometimes makes problem either
+    const result = n1 + n2;
+    if (showResult){
+        console.log(phrase + result);
+    } else{
+        return result;
+    }
+}
+// we gotta initiate the type when the value is unassigned. like => let number1: number; 
+const number1 = 5; // this could be string in javascript and it can be combined like 54.4 so in big datas this is a big problem but in typescript
+// we can arrange that with defining the types in parameters and also if typeof method is good idea to do error control
+const number2 = 4.4;
+const printResult = true;
+const resultPhrase = 'Result is: ';
+
+const result = add2(number1, number2, printResult, resultPhrase);
+console.log(result);
 
 
 
+// const ADMIN = 0;
+// const READ_ONLY = 1;
+// const AUTHOR = 2;
+
+enum Role {
+    ADMIN = 3, // you can clarify them with numbers and it does increment to the next ones
+    READ_ONLY,
+    AUTHOR
+}
+
+const person: {
+    name: string;
+    age: number; // thats why we are creating object types
+    hobbies: string[];
+    role: Role; // enum declared here
+} = {
+    name: 'Burak',
+    age:25,
+    hobbies: ['Sports', 'Cooking'],
+    role:  Role.ADMIN // 'READ ONLY USER'
+}; // to call person.name we hate to clarify it not as "object" but "{}"
+
+
+
+console.log(person.name); // if we try to acces the properity which is not exists we will have an error
+
+// another example
+const product: {
+  id: string;
+  price: number;
+  tags: string[];
+  details: {
+    title: string;
+    description: string;
+  };
+  role: [number, string]; // this is the role type for tuple
+} = {
+  id: 'abc1',
+  price: 12.99,
+  tags: ['great-offer', 'hot-and-new'],
+  details: {
+    title: 'Red Carpet',
+    description: 'A great carpet - almost brand-new!'
+  },
+  role: [ 2, 'author'] // tuple is the best type for this
+}
+console.log(product); 
+// product.role[1] = 10; // tuple can give error to this for that you must write we must give the second value
+product.role.push('essential');
+// let newTags: string[];
+// product.tags.push('new tag'); ya da product.tags = [...product.tags, 'new tag'] seklinde yapilabili
+
+for ( const tag of product.tags ){
+    console.log( tag.toUpperCase() ); // accessing to values
+    // console.log(tag.map()) occured error
+}
 
 
