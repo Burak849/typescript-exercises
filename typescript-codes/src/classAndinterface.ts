@@ -1,3 +1,5 @@
+import { describe } from "node:test";
+
 class Sinif { // start with uppercase letter 
     name: string; // you gotta add properities to use in constructor function
     age: number; 
@@ -169,3 +171,85 @@ interface AuthenticatableAdmin extends AuthenticatableUsers{
     role: 'Admin' | 'Superadmin'; // you can extends for login and logout processes
     // with extends method we dont touch the original instead of we create addition interface and we use its properities there
 } 
+
+class Department {
+    // private id: string;
+    // private name: string;
+    static fiscalYear = 2025; // statics cant be called with "this" you must use like Department.fiscalYear
+
+    private employees: string[] = []; 
+
+    constructor( private readonly id:string, public name: string){ // normally you dont need to clarify the public one but in construction needs public
+        // this.id = id;
+        // this.name1 = name1;
+    }
+
+    static createEmployee(name: string) {
+        return {name:name};
+    }
+
+    describe( this: Department ){ // to solve "this" problem (you cant acces the value outside of the class) 
+                                  // you can add special parament to "describe" method and give the class's tpye
+    console.log(`Department ${this.id} : ${this.name}`); // to use property globally in the class we must write "this" keyword 
+
+    }// calling method in created object
+
+    addEmployee( employee : string ){
+        // validation will be required
+        this.employees.push(employee);
+    }
+
+    printEmployeeInform(){
+        console.log(this.employees.length);
+        console.log(this.employees);
+    }
+} // "this" cannot be referd outside of the method 
+
+class ITDepartment extends Department{ // department is automatically used so thats why super requires 2 definations
+    admins: string[];
+    constructor( id: string, admins: string[] ){
+        super(id , 'IT'); // calls constructor of the base class
+        // you gotta satisfy the super with the keywords before using "this" keyword.
+        this.admins = admins;
+    }
+}
+
+const employee1 = Department.createEmployee('AA');
+console.log(employee1,Department.fiscalYear); // you can acces the statics like this
+
+
+const accounting = new Department( Math.random().toString(),'Accounting'); // created new department object
+const accountin2 = new ITDepartment( 'd1' , ['Omer']); // created new department object
+accountin2.addEmployee('Hans');
+console.log(accountin2);
+
+
+accounting.addEmployee('Ali');
+accounting.addEmployee('Mehmet'); // accessing to employees like this is not a good idea for that we shall make it private
+
+// accounting.employees[2] = 'Enes'; so they cant add like this
+
+console.log(accounting);
+accounting.describe();
+
+const accountingCopy = { name:"Dummy" , describe: accounting.describe};
+accounting.describe();
+
+interface Person{
+    name:string;
+    age: number;
+    greet ( phrase : string ): void;
+}
+
+let user1: Person;
+user1 = {
+    name: 'Burak',
+    age: 25,
+    greet(phrase : string){
+        console.log( phrase + ' ' + this.name );
+    }
+};
+
+user1.greet('Hi there!');
+
+// you can implement interface more than one to classes

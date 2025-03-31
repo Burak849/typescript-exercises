@@ -47,3 +47,93 @@ class User <T>{
 
 const user = new User(1);
 
+
+const isimler: Array<string> = []; // === string[]     those are same things
+isimler[0].split(' '); // now we can use like this
+
+const promise: Promise<string> = new Promise( ( resolve, reject ) => {
+    setTimeout( () =>{
+        resolve('This is done!');
+    },2000);
+    reject('This is not done!');
+});
+
+promise.then( data => {
+    data.split(' '); // we gave string if you try to give the value as number it will be error
+});
+
+function merges<T, U>( objA: T , objB: U ) {
+    return Object.assign( {} , objA, objB);
+}
+
+const mergedObj = merges<{name:string, hobbies: string[]}, {age:number}>({name: 'Ayse', hobbies: ['Sports']}, {age:30});
+console.log(mergedObj);
+
+ 
+interface Lengthy{
+    length:number;
+}
+
+function countAndPrint<T extends Lengthy> (element: T): [T, string] {  // tuple end of the line
+    let descriptonText = 'Got no value';
+    if ( element.length > 0 ){
+        descriptonText = 'Got ' + element.length + ' elements'
+    } else if ( element.length > 1 ){
+        descriptonText = 'Got ' + element.length + ' elements'
+    }
+    return [element,descriptonText];
+}
+console.log(countAndPrint('Hi there!'));
+
+function exractAndConvert<T extends object, U extends keyof T> ( obj: T, key:U ){ // first parameter any kind of object and 2nd parameter
+    // is the any key of object
+    return obj[key]; 
+}
+
+exractAndConvert({name:'Max'}, 'name'); // 2nd parameter-> so we are just accessing the key "name" because its the key of the object
+
+class DataStorage<T> {
+    private data: T[] = [];
+
+    addItem(item: T){
+        this.data.push(item);
+    }
+
+    removeItem(item: T){
+        this.data.splice(this.data.indexOf(item), 1); // when we work with arrays or objects that wont be good 
+    }
+    getItems(){
+        return [...this.data];
+    }
+}
+const textStorage = new DataStorage<string>();
+textStorage.addItem('Veli');
+textStorage.addItem('Omer');
+textStorage.removeItem('Veli');
+console.log(textStorage.getItems());
+
+//const numberStorage = new DataStorage<number>(); // we have flexibility
+
+const objStorage = new DataStorage<object>();
+objStorage.addItem({name: 'Max'});
+objStorage.addItem({name: 'Malu'});
+objStorage.removeItem({name: 'Malu'});
+console.log(objStorage.getItems());
+
+interface CourseGoal {
+    title: string;
+    description: string;
+    completeUntil: Date;
+}
+
+function createCourseGoal( title: string, description: string, date: Date): CourseGoal{
+    let courseGoal: Partial<CourseGoal> = {};
+    courseGoal.title = title;
+    courseGoal.description = description;
+    courseGoal.completeUntil= date;
+    return courseGoal as CourseGoal;
+}
+
+const isims: Readonly<string[]> = ['burak', 'ayse'];
+// isims.push('John') it will be cant changable because its readonly string array
+// isims.pop();
